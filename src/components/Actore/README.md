@@ -5,7 +5,8 @@ npm run lint
 ```
 
 ```
-运行代码
+运行代码（快速原型开发）
+npm install -g @vue/cli-service-global
 npm run test:actore
 ```
 

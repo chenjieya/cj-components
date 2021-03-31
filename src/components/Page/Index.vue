@@ -1,113 +1,150 @@
 <template>
-  <div id="page-container">
-    <!-- 分页组件 -->
-    <ul class="page">
-      <li
-        :class="{ 'page-item': true, disabled: currentPage <= 1 }"
-        @click="handlePage(1)"
-      >
-        <a>|&lt;&lt;</a>
-      </li>
-      <li
-        :class="{ 'page-item': true, disabled: currentPage <= 1 }"
-        @click="handlePage(currentPage - 1)"
-      >
-        <a>|&lt;</a>
-      </li>
-      <li
-        :class="{
-          'page-item': true,
-          active: currentPage === item,
-        }"
-        v-for="item in showPage"
-        :key="item"
-        @click="handlePage(item)"
-      >
-        <a>{{ item }}</a>
-      </li>
-      <li
-        :class="{ 'page-item': true, disabled: currentPage >= totalPage }"
-        @click="handlePage(currentPage + 1)"
-      >
-        <a>&gt;|</a>
-      </li>
-      <li
-        :class="{ 'page-item': true, disabled: currentPage >= totalPage }"
-        @click="handlePage(totalPage)"
-      >
-        <a>&gt;&gt;|</a>
-      </li>
-    </ul>
+  <div id="page-container" :style="{width: cjContainerWidth+'px'}">
+    <div id="cj-page-container" style="width: 100%;">
+      <!--
+        传参：
+          1. cjLimt 每一页有多少条数据    Number
+          2. cjIsborder 是否显示边框    Boolean
+          3. cjTotal 总数据            Number
+          4. cjCurrent 当前的页码       Number
+          5. cjPage 页面中显示多少个数字  Number
+      -->
+      <ul class="cj-page">
+        <li
+            v-if="this.cjCurrent !== 1"
+            @click="cjHandleClickPage(cjCurrent-1)"
+            :class="{
+            'cj-is-border': cjIsborder,
+          }"
+        >上一页</li>
+        <li
+            v-for="(item, index) in cjPageNumber"
+            :key="index"
+            :class="{
+            'cj-current': cjCurrent === item,
+            'cj-is-border': cjIsborder,
+          }"
+            @click="cjHandleClickPage(item)"
+        >{{ item }}</li>
+        <li
+            v-if="this.cjCurrent !== this.cjTotalPage"
+            @click="cjHandleClickPage(cjCurrent+1 )"
+            :class="{
+            'cj-is-border': cjIsborder,
+          }"
+        >下一页</li>
+      </ul>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  props: {
-    pageInfo: {
-      type: Object,
+  props:{
+    cjCurrent: {
+      type: Number,
       required: true,
     },
+    cjLimt: {
+      type: Number,
+      required: true,
+    },
+    cjPage: {
+      type: Number,
+      default: 10,
+    },
+    cjTotal: {
+      type: Number,
+      required: true,
+    },
+    cjIsborder: {
+      type: Boolean,
+      default: true,
+    },
+    cjContainerWidth: {
+      type: Number,
+      default: 600,
+    }
+  },
+  data() {
+    return {
+    }
   },
   computed: {
-    // limtPage() {
-    //   //获得一共显示多少分页按钮
-    //   const { limt } = this.pageInfo;
-    //   return limt;
-    // },
-    currentPage() {
-      //获得当前页
-      const { current } = this.pageInfo;
-      return current;
+    /*计算一共有多少页*/
+    cjTotalPage() {
+      //计算之中可能会产生小数，我们需要向上取整
+      return Math.ceil(this.cjTotal / this.cjLimt);
     },
-    showPage() {
-      // 页面中显示的数字
-      const { current, limt, total } = this.pageInfo;
-      let startPage = current - Math.floor(limt / 2); //当前开始的数字
-      startPage = startPage < 1 ? 1 : startPage;
-
-      let endPage = startPage + limt - 1;
-      endPage = endPage > total ? total : endPage;
-      let arr = [];
-      for (let i = 0; i <= limt; i++) {
-          console.log(endPage);
-        arr.push(startPage);
-        startPage++;
+    /*计算页面中页码数的起始值*/
+    cjStartPage() {
+      let start = this.cjCurrent - this.cjPage/2;
+      // 计算完之后的开始页数，小于1的话，重新赋值
+      if (start<1){
+        start = 1;
       }
-      return arr;
+      return start;
     },
-    totalPage() {
-      const { total } = this.pageInfo;
-      return total;
+    /*计算页面中页码数的结束页*/
+    cjEndPage() {
+      let end = this.cjStartPage + this.cjPage - 1;
+      // 如果计算完之后，最后的一页数字大于总页数，重新给最后一页赋值
+      if (end>this.cjTotalPage) {
+        end = this.cjTotalPage;
+      }
+      return end;
+    },
+    /*计算页面中显示的数字*/
+    cjPageNumber() {
+      //将数字放到数组之中，便于循环（循环是为了在页面中生成li）
+      let showPageNumber = [];
+      //开始和结束的数值，这些数值就是要显示在页面上面的页数
+      let start = this.cjStartPage;
+      let end = this.cjEndPage;
+      for (let i = start;i <= end; i++){
+        showPageNumber.push(i);
+      }
+      return showPageNumber;
     },
   },
   methods: {
-    handlePage(changpage) {
-      this.$emit("changPage", changpage);
-    },
-  },
-};
-</script>
-
-<style>
-@import "~@/assets/css/style.css";
-#page-container .page {
-  display: flex;
+    /*更改页数的方法*/
+    cjHandleClickPage(newPage) {
+      // 防止多次点击同一页码（如果多次点击同一个页码，则不通知父级changePage事件）
+      if (this.cjCurrent === newPage){
+        return;
+      }
+      this.$emit('changePage', newPage);
+    }
+  }
 }
-#page-container .page .page-item {
-  width: 30px;
+</script>
+<style scoped>
+@import "~@/assets/css/style.css";
+#cj-page-container .cj-page{
+  box-sizing: border-box;
   height: 30px;
-  border: 1px solid #ccc;
-  line-height: 30px;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#cj-page-container .cj-page li{
+  height: 100%;
+  width: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 5px;
+  border-radius: 4px;
+  font-size: 12px;
   cursor: pointer;
 }
-#page-container .page .page-item.active {
-  background-color: #f40;
-  color: #fff;
+#cj-page-container .cj-page li.cj-is-border{
+  border: 1px solid;
 }
-#page-container .page .disabled {
-  background-color: #ccc;
-  cursor: no-drop;
+#cj-page-container .cj-page li.cj-current{
+  background-color: #4E6EF2;
+  color: #fff;
+  border-color: #4E6EF2;
 }
 </style>
