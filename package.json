@@ -6,7 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:actore": "vue serve ./src/components/Actore/test.vue",
-    "test:page": "vue serve ./src/components/Page/test.vue"
+    "test:page": "vue serve ./src/components/Page/test.vue",
+    "test:icon": "vue serve ./src/components/Icon/test.vue"
   },
   "dependencies": {
     "core-js": "^3.6.5",
