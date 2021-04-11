@@ -8,7 +8,8 @@
     "test:actore": "vue serve ./src/components/Actore/test.vue",
     "test:page": "vue serve ./src/components/Page/test.vue",
     "test:icon": "vue serve ./src/components/Icon/test.vue",
-    "test:imageLoad": "vue serve ./src/components/ImageLoad/test.vue"
+    "test:imageLoad": "vue serve ./src/components/ImageLoad/test.vue",
+    "test:contact": "vue serve ./src/components/Contact/test.vue"
   },
   "dependencies": {
     "core-js": "^3.6.5",
