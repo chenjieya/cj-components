@@ -2,7 +2,7 @@
   <div id="image-load-container">
     <!--图片站位-->
     <img :src="placeholder" class="placeholder-image" v-if="!everyDone">
-    <img :src="src" @load="handleLoad" :style="{'origin-image': originState, transition: `${duration}ms`}">
+    <img :src="src" @load="handleLoad" :style="{opacity: opacitytState, transition: `${duration}ms`}">
   </div>
 </template>
 <script>
@@ -33,10 +33,16 @@ export default {
       // 原图加载完成的时候执行的事件
       this.originState = true;
       setTimeout(()=>{
-        this.everyDone = true
+        this.everyDone = true;
+        this.$emit('load');
       }, this.duration)
     }
-  }
+  },
+  computed: {
+    opacitytState() {
+      return this.originState?1:0;
+    }
+  },
 }
 </script>
 <style scoped lang="less">
@@ -45,9 +51,6 @@ export default {
   height: 100%;
   position: relative;
   overflow: hidden;
-  .origin-image {
-    opacity: 0;
-  }
   .placeholder-image {
     filter: blur(2vw);
   }
